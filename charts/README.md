@@ -23,9 +23,6 @@ and both CRDs come from the operator chart. And the operator exists once per
 Kubernetes cluster and the drivers only where pods use Ceph volumes, while
 each CES cluster is a release of its own, upgraded or removed on its own.
 
-`rook/helm-charts/` holds the older values files for the upstream Rook 1.19
-charts.
-
 ## Installing
 
 No chart repository serves these charts yet, and Helm cannot install from a
@@ -117,7 +114,8 @@ uninstalling the drivers removes the drivers.
 
 Rook moves one minor version at a time. A cluster on Rook 1.19 goes to 1.20
 with the upstream charts first, installing `ceph-csi-drivers` along the way,
-and only then to these charts.
+and only then to these charts. The values files this repository shipped for
+the upstream Rook 1.19 charts are kept at the tag `rook-1.19-values`.
 
 ## Moving existing upstream releases to these charts
 
