@@ -1,0 +1,75 @@
+apiVersion: v1
+entries:
+  ces-ceph-cluster:
+  - annotations:
+      clyso.com/ceph-csi-operator-version: 1.1.0
+      clyso.com/rook-version: 1.21.1
+    apiVersion: v2
+    appVersion: v1.21.1
+    created: "2026-11-03T18:06:30.626086582Z"
+    dependencies:
+    - name: rook-ceph-cluster
+      repository: https://charts.rook.io/release
+      version: 1.21.1
+    description: A Clyso Enterprise Storage (CES) cluster managed by Rook
+    digest: c02f9a84e3c452d2d85b1ceeab037dc0a42c5aff9a3ea090cebc81d22ccccf12
+    keywords:
+    - ceph
+    - rook
+    - ces
+    kubeVersion: '>=1.32.0-0 <1.38.0-0'
+    name: ces-ceph-cluster
+    type: application
+    urls:
+    - https://github.com/clyso/ces-helm-charts/releases/download/ces-ceph-cluster-1.0.0/ces-ceph-cluster-1.0.0.tgz
+    version: 1.0.0
+  ces-csi-drivers:
+  - annotations:
+      clyso.com/ceph-csi-operator-version: 1.1.0
+      clyso.com/rook-version: 1.21.1
+    apiVersion: v2
+    appVersion: v1.1.0
+    created: "2026-11-03T18:06:30.819596908Z"
+    dependencies:
+    - name: ceph-csi-drivers
+      repository: https://ceph.github.io/ceph-csi-operator
+      version: 1.1.0
+    description: Ceph CSI drivers for Clyso Enterprise Storage (CES) on Rook, pinned
+      to one ceph-csi-drivers release
+    digest: 4712dc5e98baf3227eef0da9e78e77503c83e6381fdfcd2bdee1bd036cf55c8f
+    keywords:
+    - ceph
+    - rook
+    - csi
+    - ces
+    kubeVersion: '>=1.32.0-0 <1.38.0-0'
+    name: ces-csi-drivers
+    type: application
+    urls:
+    - https://github.com/clyso/ces-helm-charts/releases/download/ces-csi-drivers-1.0.0/ces-csi-drivers-1.0.0.tgz
+    version: 1.0.0
+  ces-rook-operator:
+  - annotations:
+      clyso.com/ceph-csi-operator-version: 1.1.0
+      clyso.com/rook-version: 1.21.1
+    apiVersion: v2
+    appVersion: v1.21.1
+    created: "2026-11-03T18:06:31.001163827Z"
+    dependencies:
+    - name: rook-ceph
+      repository: https://charts.rook.io/release
+      version: 1.21.1
+    description: Rook operator for Clyso Enterprise Storage (CES), pinned to one Rook
+      release
+    digest: 7df61d2993e56c01e32da90e60b961650be1257e19f8912667400a1a97e30ede
+    keywords:
+    - ceph
+    - rook
+    - ces
+    kubeVersion: '>=1.32.0-0 <1.38.0-0'
+    name: ces-rook-operator
+    type: application
+    urls:
+    - https://github.com/clyso/ces-helm-charts/releases/download/ces-rook-operator-1.0.0/ces-rook-operator-1.0.0.tgz
+    version: 1.0.0
+generated: "2026-11-03T18:06:31.001174136Z"
