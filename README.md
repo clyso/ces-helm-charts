@@ -44,7 +44,7 @@ settings and what it changes from upstream.
 | Path | Holds |
 |---|---|
 | [`charts/`](charts/) | the three charts, with their test cases in `charts/<chart>/tests/` |
-| [`hack/`](hack/) | the scripts that fetch the pinned upstream charts, check the charts and package them |
+| [`hack/`](hack/) | the scripts that fetch the pinned upstream charts, check the charts and package them, and the chart repository's landing page |
 | [`.github/workflows/charts.yaml`](.github/workflows/charts.yaml) | checks every pull request, and publishes new chart versions from `main` |
 
 ## Working on the charts

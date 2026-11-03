@@ -96,8 +96,7 @@ jobs:
         id: package
         run: hack/package-charts.sh .cr-release-packages
 
-      - name: Set the git identity for the index commits
-        if: steps.package.outputs.count != '0'
+      - name: Set the git identity for the gh-pages commits
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -122,3 +121,26 @@ jobs:
           skip_existing: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # index.html beside index.yaml, from hack/pages/index.html: on every run,
+      # so that a change to the page alone is published too. Other files on
+      # gh-pages, such as the CNAME of a custom domain, are left as they are.
+      - name: Update the landing page
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null; then
+            echo "No gh-pages branch yet: no release has been published."
+            exit 0
+          fi
+          git fetch origin gh-pages
+          pages="$RUNNER_TEMP/gh-pages"
+          git worktree add --detach "$pages" origin/gh-pages
+          python3 -I hack/render-pages.py "$pages/index.yaml" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" >"$pages/index.html"
+          touch "$pages/.nojekyll"
+          cd "$pages"
+          git add index.html .nojekyll
+          if git diff --cached --quiet; then
+            echo "The landing page is up to date."
+            exit 0
+          fi
+          git commit -m "Update the landing page"
+          git push origin HEAD:gh-pages

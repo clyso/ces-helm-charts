@@ -211,9 +211,22 @@ source. Packaging is done by `hack/package-charts.sh` rather than by
 chart-releaser, whose `helm dependency update` would replace the checked
 subcharts.
 
+The workflow also keeps a landing page, `index.html`, beside `index.yaml`. It
+is made from `hack/pages/index.html` by `hack/render-pages.py`, and shows how
+to add the repository, the charts at their newest versions, and how to
+install CES. The page takes the repository's address from wherever it is
+served, so a custom domain needs no change to it.
+
 Once per repository, after the first release has created the `gh-pages`
-branch: in Settings, Pages, deploy from the branch `gh-pages`, folder
-`/ (root)`.
+branch:
+
+1. In Settings, Pages, deploy from the branch `gh-pages`, folder `/ (root)`.
+2. Point the domain at GitHub with a DNS `CNAME` record, `charts.ces.clyso.com`
+   to `clyso.github.io`, and set it as the custom domain in the same
+   settings. GitHub adds a `CNAME` file to `gh-pages`, which the workflow
+   leaves in place. Enforce HTTPS once GitHub has issued the certificate.
+3. Verify the domain in the organization's Pages settings, so that no other
+   repository can serve it.
 
 Signing is optional. With these set in the repository's Actions settings,
 every package gets a `.prov` file, which `helm install --verify --keyring
