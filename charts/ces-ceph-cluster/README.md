@@ -6,15 +6,18 @@ exactly **1.21.1** and runs the CES image
 `harbor.clyso.com/ces/ceph/ceph`, at the CES release its values name.
 
 Install it after `ces-rook-operator`, and after `ces-csi-drivers` if pods in
-this Kubernetes cluster are to use its pools:
+this Kubernetes cluster are to use its pools, from the chart repository
+`https://charts.ces.clyso.com`:
 
 ```console
-helm install ces-ceph-cluster charts/ces-ceph-cluster --namespace rook-ceph -f cluster.yaml
+helm repo add clyso https://charts.ces.clyso.com
+helm install ces-ceph-cluster clyso/ces-ceph-cluster --version 1.0.0 --namespace rook-ceph -f cluster.yaml
 kubectl -n rook-ceph get cephcluster -w
 ```
 
-From a git checkout, run `hack/fetch-subcharts.sh ces-ceph-cluster` first;
-packaged releases already contain the subchart.
+From a git checkout, run `hack/fetch-subcharts.sh ces-ceph-cluster` first,
+and install `charts/ces-ceph-cluster` instead; packaged releases already
+contain the subchart.
 
 ## The CES release
 

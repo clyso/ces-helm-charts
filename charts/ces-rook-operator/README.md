@@ -6,20 +6,22 @@ The Rook operator for Clyso Enterprise Storage (CES). It wraps the upstream
 CRDs and RBAC.
 
 Install it once per Kubernetes cluster, before `ces-csi-drivers` and the
-`ces-ceph-cluster` releases:
+`ces-ceph-cluster` releases, from the chart repository
+`https://charts.ces.clyso.com`:
 
 ```console
-helm install ces-rook-operator charts/ces-rook-operator --namespace rook-ceph --create-namespace
+helm repo add clyso https://charts.ces.clyso.com
+helm install ces-rook-operator clyso/ces-rook-operator --version 1.0.0 --namespace rook-ceph --create-namespace
 ```
 
 Rook's pods run privileged: where Pod Security admission is enforced, label
 the namespace `pod-security.kubernetes.io/enforce=privileged` first.
 
-From a git checkout, run `hack/fetch-subcharts.sh ces-rook-operator` first.
-It fetches the pinned subchart and checks it against `dependencies.sha256`.
-`helm dependency build` would need the upstream repository added with `helm
-repo add`, and does not check the archive. Packaged releases already contain
-the subchart.
+From a git checkout, run `hack/fetch-subcharts.sh ces-rook-operator` first,
+and install `charts/ces-rook-operator` instead. It fetches the pinned
+subchart and checks it against `dependencies.sha256`. `helm dependency build`
+would need the upstream repository added with `helm repo add`, and does not
+check the archive. Packaged releases already contain the subchart.
 
 ## What differs from upstream
 

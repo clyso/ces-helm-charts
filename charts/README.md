@@ -25,39 +25,51 @@ each CES cluster is a release of its own, upgraded or removed on its own.
 
 ## Installing
 
-No chart repository serves these charts yet, and Helm cannot install from a
-git repository: `--repo` needs an `index.yaml` at the URL it is given. Until
-the charts are published, install them from a checkout of this repository,
-where `<ref>` is a branch, such as `main`, or a tag:
+The released charts are in the Helm chart repository
+`https://charts.ces.clyso.com`, which the workflow in
+`.github/workflows/charts.yaml` publishes from main (see "Releasing"). Add it
+under a name of your choice:
 
 ```console
-git clone --depth 1 --branch <ref> https://github.com/clyso/ces-manifests
-cd ces-manifests
+helm repo add clyso https://charts.ces.clyso.com
+helm repo update clyso
+```
+
+Rook's pods run privileged: where Pod Security admission is enforced, label
+each namespace `pod-security.kubernetes.io/enforce=privileged` first. Then
+install in this order, each at the same exact version, waiting for each step:
+
+```console
+helm install ces-rook-operator clyso/ces-rook-operator --version 1.0.0 -n rook-ceph --create-namespace --wait
+helm install ces-csi-drivers clyso/ces-csi-drivers --version 1.0.0 -n rook-ceph --wait
+helm install ces-ceph-cluster clyso/ces-ceph-cluster --version 1.0.0 -n rook-ceph -f cluster.yaml
+kubectl -n rook-ceph get cephcluster -w      # until HEALTH_OK
+```
+
+Without `helm repo add`, `--repo https://charts.ces.clyso.com` and
+the bare chart name do the same. The packages carry the upstream charts, so
+nothing is fetched from upstream.
+
+### From a git checkout
+
+A branch or commit that has no release yet installs from a checkout. Helm
+cannot install from a git repository itself: `--repo` needs an `index.yaml`
+at the URL it is given. Clone the ref, fetch the upstream charts it pins, and
+use the chart directories in place of `clyso/<chart>`:
+
+```console
+git clone --depth 1 --branch <ref> https://github.com/clyso/ces-helm-charts
+cd ces-helm-charts
 hack/fetch-subcharts.sh
+helm install ces-rook-operator charts/ces-rook-operator -n rook-ceph --create-namespace --wait
 ```
 
 `hack/fetch-subcharts.sh` downloads the pinned upstream charts, which git
 doesn't hold, from charts.rook.io and ceph.github.io, and checks each archive
-against `dependencies.sha256`. A branch moves: to install the same charts
-again later, clone a tag.
-
-Rook's pods run privileged: where Pod Security admission is enforced, label
-each namespace `pod-security.kubernetes.io/enforce=privileged` first. Then
-install in this order, waiting for each step:
-
-```console
-helm install ces-rook-operator charts/ces-rook-operator -n rook-ceph --create-namespace --wait
-helm install ces-csi-drivers charts/ces-csi-drivers -n rook-ceph --wait
-helm install ces-ceph-cluster charts/ces-ceph-cluster -n rook-ceph -f cluster.yaml
-kubectl -n rook-ceph get cephcluster -w      # until HEALTH_OK
-```
-
-With a local path, the checkout decides the chart version, and Helm ignores
-`--version`. Once the charts are published, the same commands take them from
-the repository by an exact version instead: `ces/ces-rook-operator --version
-1.0.0` after `helm repo add ces <repository URL>`, or `ces-rook-operator
---repo <repository URL> --version 1.0.0`. The packages carry the upstream
-charts, so nothing is fetched from upstream then.
+against `dependencies.sha256`. With a local path, the checkout decides the
+chart version, and Helm ignores `--version`. Each release is tagged
+`<chart>-<version>`, such as `ces-rook-operator-1.0.0`: cloning that tag
+gets the three charts as released.
 
 `ces-csi-drivers` is needed only for Ceph volumes in this Kubernetes
 cluster; without it, no CSI plugin runs. Keep the CSI operator of
@@ -92,16 +104,17 @@ lists, so changing one pool means restating the list.
 
 The three charts are released together, under one version. Upgrade them in
 order, operator first, and wait for every CES cluster to return to
-`HEALTH_OK`. From a checkout of the new version, made as for installing:
+`HEALTH_OK`:
 
 ```console
-helm upgrade ces-rook-operator charts/ces-rook-operator -n rook-ceph --wait
-helm upgrade ces-csi-drivers charts/ces-csi-drivers -n rook-ceph --wait
-helm upgrade ces-ceph-cluster charts/ces-ceph-cluster -n rook-ceph -f cluster.yaml
+helm repo update clyso
+helm upgrade ces-rook-operator clyso/ces-rook-operator --version <new> -n rook-ceph --wait
+helm upgrade ces-csi-drivers clyso/ces-csi-drivers --version <new> -n rook-ceph --wait
+helm upgrade ces-ceph-cluster clyso/ces-ceph-cluster --version <new> -n rook-ceph -f cluster.yaml
 ```
 
-From a chart repository, the charts and `--version <new>` take the place of
-the paths.
+From a checkout of the new version, the chart directories take the place of
+`clyso/<chart> --version <new>`.
 
 A chart upgrade leaves each cluster on the CES release its values name.
 Moving a cluster to another CES release is a change of
@@ -120,12 +133,12 @@ the upstream Rook 1.19 charts are kept at the tag `rook-1.19-values`.
 ## Moving existing upstream releases to these charts
 
 Upgrade each upstream release in place, keeping its release name, with its
-values nested under the upstream chart's name. From a checkout:
+values nested under the upstream chart's name:
 
 ```console
-helm upgrade rook-ceph charts/ces-rook-operator -n rook-ceph -f operator.yaml
-helm upgrade ceph-csi-drivers charts/ces-csi-drivers -n rook-ceph -f drivers.yaml
-helm upgrade rook-ceph-cluster charts/ces-ceph-cluster -n rook-ceph -f cluster.yaml
+helm upgrade rook-ceph clyso/ces-rook-operator --version 1.0.0 -n rook-ceph -f operator.yaml
+helm upgrade ceph-csi-drivers clyso/ces-csi-drivers --version 1.0.0 -n rook-ceph -f drivers.yaml
+helm upgrade rook-ceph-cluster clyso/ces-ceph-cluster --version 1.0.0 -n rook-ceph -f cluster.yaml
 ```
 
 Helm lets a release change charts, and the subcharts render the same
@@ -160,6 +173,7 @@ not part of the chart packages, so it can change between chart releases:
 | `hack/gen-schemas.py` | writes each `values.schema.json` from its `values.schema.yaml` |
 | `hack/check-versions.py` | checks that the charts pin one consistent set of versions, and that each `appVersion` names its upstream pin |
 | `hack/check-charts.sh` | runs all of the above, then renders and lints every case in `tests/`; offline once the subcharts are fetched |
+| `hack/package-charts.sh <dir>` | packages each chart version that has no release yet, for the release workflow |
 
 The checks need Helm 3.13 or later, and python3 with PyYAML.
 
@@ -179,6 +193,33 @@ To move to a new Rook release:
    supports.
 6. Run `hack/check-charts.sh`.
 
-To release a version, run `hack/check-charts.sh`, `helm package` each chart
-(the subcharts go into the package), sign the packages, and push them to the
-chart repository.
+## Releasing
+
+`.github/workflows/charts.yaml` runs `hack/check-charts.sh` on every pull
+request that touches the charts. On main it also publishes each chart
+version that has no release yet: a GitHub release named `<chart>-<version>`
+carries the package, and `index.yaml` on the `gh-pages` branch, which GitHub
+Pages serves, lists it. To release:
+
+1. Raise `version` in all three `Chart.yaml` files, as "Versions" describes;
+   `hack/check-versions.py` requires them equal.
+2. Merge to main.
+
+A released chart cannot change under its version: the workflow fails when a
+chart differs from its release tag in anything but its tests and schema
+source. Packaging is done by `hack/package-charts.sh` rather than by
+chart-releaser, whose `helm dependency update` would replace the checked
+subcharts.
+
+Once per repository, after the first release has created the `gh-pages`
+branch: in Settings, Pages, deploy from the branch `gh-pages`, folder
+`/ (root)`.
+
+Signing is optional. With these set in the repository's Actions settings,
+every package gets a `.prov` file, which `helm install --verify --keyring
+<public keyring>` checks against the published public key:
+
+- secret `HELM_SIGNING_KEYRING`: the signing key, as `gpg --export-secret-keys
+  <key> | base64 -w0` prints it;
+- secret `HELM_SIGNING_PASSPHRASE`: its passphrase;
+- variable `HELM_SIGNING_KEY`: the key's name, such as its email address.

@@ -1,0 +1,124 @@
+# Checks the charts on pull requests and on main, and from main publishes
+# every chart version that has no release yet to the Helm chart repository on
+# GitHub Pages: each chart version gets a GitHub release carrying its package,
+# and index.yaml on the gh-pages branch lists them. charts/README.md,
+# "Releasing", has the one-time setup.
+#
+# The packages are made by hack/package-charts.sh, not by chart-releaser:
+# chart-releaser's packaging runs `helm dependency update`, which would replace
+# the subcharts that hack/fetch-subcharts.sh checks against
+# dependencies.sha256.
+name: charts
+
+on:
+  pull_request:
+    paths:
+      - charts/**
+      - hack/**
+      - .github/workflows/charts.yaml
+  push:
+    branches: [main]
+    paths:
+      - charts/**
+      - hack/**
+      - .github/workflows/charts.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: charts-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HELM_VERSION: v3.19.0
+  PYYAML_VERSION: 6.0.2
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "pyyaml==$PYYAML_VERSION"
+      - run: hack/check-charts.sh
+
+  release:
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # the GitHub releases, and the index on gh-pages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # every release tag, and the gh-pages branch
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "pyyaml==$PYYAML_VERSION"
+      - run: hack/fetch-subcharts.sh
+
+      - name: Load the signing key, if one is configured
+        env:
+          KEYRING: ${{ secrets.HELM_SIGNING_KEYRING }}
+          PASSPHRASE: ${{ secrets.HELM_SIGNING_PASSPHRASE }}
+          KEY: ${{ vars.HELM_SIGNING_KEY }}
+        run: |
+          if [[ -z "$KEYRING" ]]; then
+            echo "::notice::No HELM_SIGNING_KEYRING secret: the packages are published unsigned."
+            exit 0
+          fi
+          if [[ -z "$KEY" ]]; then
+            echo "::error::HELM_SIGNING_KEYRING is set, but the HELM_SIGNING_KEY variable, the key's name, is not."
+            exit 1
+          fi
+          dir="$RUNNER_TEMP/signing"
+          install -d -m 700 "$dir"
+          base64 -d <<<"$KEYRING" >"$dir/secring.gpg"
+          printf '%s' "$PASSPHRASE" >"$dir/passphrase"
+          {
+            echo "SIGNING_KEY=$KEY"
+            echo "SIGNING_KEYRING=$dir/secring.gpg"
+            echo "SIGNING_PASSPHRASE_FILE=$dir/passphrase"
+          } >>"$GITHUB_ENV"
+
+      - name: Package the chart versions not released yet
+        id: package
+        run: hack/package-charts.sh .cr-release-packages
+
+      - name: Set the git identity for the index commits
+        if: steps.package.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # chart-releaser updates index.yaml on an existing gh-pages branch only.
+      - name: Create the gh-pages branch, on the first release
+        if: steps.package.outputs.count != '0'
+        run: |
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null; then
+            exit 0
+          fi
+          empty_tree="$(git hash-object -t tree /dev/null)"
+          commit="$(git commit-tree "$empty_tree" -m "Helm chart repository index, maintained by chart-releaser")"
+          git push origin "$commit:refs/heads/gh-pages"
+          git fetch origin gh-pages
+
+      - name: Publish the packages and update the index
+        if: steps.package.outputs.count != '0'
+        uses: helm/chart-releaser-action@92c6b97fa9f664492a2592e0d1d80bc6bf378957 # v1.9.0
+        with:
+          skip_packaging: true
+          skip_existing: true
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

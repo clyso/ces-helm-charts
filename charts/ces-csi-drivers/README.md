@@ -16,14 +16,17 @@ reach Ceph without it. Without CSI, skip this chart: no CSI plugin runs
 then. `ces-rook-operator` keeps the CSI operator all the same, because Rook
 1.21.1 needs its CRDs; that chart's README says why.
 
-Install it once, after `ces-rook-operator` and in the same namespace:
+Install it once, after `ces-rook-operator` and in the same namespace, from
+the chart repository `https://charts.ces.clyso.com`:
 
 ```console
-helm install ces-csi-drivers charts/ces-csi-drivers --namespace rook-ceph
+helm repo add clyso https://charts.ces.clyso.com
+helm install ces-csi-drivers clyso/ces-csi-drivers --version 1.0.0 --namespace rook-ceph
 ```
 
-From a git checkout, run `hack/fetch-subcharts.sh ces-csi-drivers` first;
-packaged releases already contain the subchart.
+From a git checkout, run `hack/fetch-subcharts.sh ces-csi-drivers` first,
+and install `charts/ces-csi-drivers` instead; packaged releases already
+contain the subchart.
 
 ## What differs from upstream
 
