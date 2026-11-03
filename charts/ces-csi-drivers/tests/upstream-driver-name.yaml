@@ -1,0 +1,6 @@
+# The upstream default name is not the provisioner Rook writes.
+# expect-error: drivers\.rbd\.name is "rbd\.csi\.ceph\.com", but Rook provisions through "rook-ceph\.rbd\.csi\.ceph\.com"
+ceph-csi-drivers:
+  drivers:
+    rbd:
+      name: rbd.csi.ceph.com

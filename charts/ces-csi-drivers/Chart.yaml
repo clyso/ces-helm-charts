@@ -1,0 +1,22 @@
+apiVersion: v2
+name: ces-csi-drivers
+description: Ceph CSI drivers for Clyso Enterprise Storage (CES) on Rook, pinned to one ceph-csi-drivers release
+type: application
+# Released together with ces-rook-operator, under the same version and rules.
+version: 1.0.0
+appVersion: "v1.1.0"
+kubeVersion: ">=1.32.0-0 <1.38.0-0"
+keywords:
+  - ceph
+  - rook
+  - csi
+  - ces
+dependencies:
+  # Exact pin. It must match the ceph-csi-operator that ces-rook-operator's
+  # rook-ceph bundles; hack/check-versions.py enforces that.
+  - name: ceph-csi-drivers
+    version: "1.1.0"
+    repository: https://ceph.github.io/ceph-csi-operator
+annotations:
+  clyso.com/rook-version: "1.21.1"
+  clyso.com/ceph-csi-operator-version: "1.1.0"

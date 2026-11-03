@@ -1,0 +1,25 @@
+# Per-driver settings, and defaults that do reach the drivers.
+# expect: name: rook-ceph\.rbd\.csi\.ceph\.com .* deployCsiAddons: true
+# expect: name: rook-ceph\.rbd\.csi\.ceph\.com .* snapshotPolicy: volumeSnapshot
+# expect: replicas: 2
+# expect: kubeletDirPath: /srv/kubelet +enableSeLinuxHostMount: true
+# expect: provisioner: +limits: +memory: 512Mi
+ceph-csi-drivers:
+  operatorConfig:
+    driverSpecDefaults:
+      nodePlugin:
+        kubeletDirPath: /srv/kubelet
+        enableSeLinuxHostMount: true
+  drivers:
+    rbd:
+      deployCsiAddons: true
+      snapshotPolicy: volumeSnapshot
+      controllerPlugin:
+        replicas: 2
+        resources:
+          provisioner:
+            limits:
+              memory: 512Mi
+    cephfs:
+      controllerPlugin:
+        replicas: 2

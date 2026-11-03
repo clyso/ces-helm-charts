@@ -1,0 +1,5 @@
+# An upstream key at the top level would be ignored, so the schema refuses it.
+# expect-error: additional properties 'drivers' not allowed
+drivers:
+  rbd:
+    snapshotPolicy: none

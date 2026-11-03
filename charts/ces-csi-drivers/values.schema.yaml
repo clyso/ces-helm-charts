@@ -1,0 +1,17 @@
+# Source of values.schema.json, which hack/gen-schemas.py writes. Edit this
+# file, never the JSON.
+#
+# Settings for the upstream chart belong under ceph-csi-drivers:. Helm would
+# ignore anything else at the top level without a word, so the schema
+# refuses it. What goes inside ceph-csi-drivers: is left to the upstream
+# chart and its documentation.
+$schema: http://json-schema.org/draft-07/schema#
+title: ces-csi-drivers values
+type: object
+additionalProperties: false
+properties:
+  global:
+    type: object
+  ceph-csi-drivers:
+    description: Values for the ceph-csi-drivers 1.1.0 subchart, passed on unchanged.
+    type: object

@@ -1,0 +1,8 @@
+# A cluster without the snapshot CRDs and controller turns snapshots off.
+# Of the drivers Rook's values enable, upstream turns them on for CephFS only.
+# expect: kind: Driver +metadata: +name: rook-ceph\.cephfs\.csi\.ceph\.com
+# reject: snapshotPolicy: volumeSnapshot
+ceph-csi-drivers:
+  drivers:
+    cephfs:
+      snapshotPolicy: none

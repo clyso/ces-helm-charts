@@ -1,0 +1,19 @@
+{{- $csi := index .Values "ceph-csi-drivers" -}}
+{{ .Chart.Name }} {{ .Chart.Version }} configured these Ceph CSI drivers (ceph-csi-operator {{ .Chart.AppVersion }}) in {{ .Release.Namespace }}:
+{{- range $type, $driver := $csi.drivers }}
+{{- if $driver.enabled }}
+  {{ $driver.name }}, snapshots: {{ $driver.snapshotPolicy | default "none" }}
+{{- end }}
+{{- end }}
+
+The StorageClasses for Rook's pools come from the ces-ceph-cluster releases.
+{{- if lookup "v1" "Namespace" "" "kube-system" }}
+{{- $snapshots := false }}
+{{- range $csi.drivers }}{{ if and .enabled (ne (.snapshotPolicy | default "none") "none") }}{{ $snapshots = true }}{{ end }}{{ end }}
+{{- if and $snapshots (not (.Capabilities.APIVersions.Has "snapshot.storage.k8s.io/v1/VolumeSnapshotClass")) }}
+
+WARNING: a driver has a snapshotPolicy, but this cluster has no
+snapshot.storage.k8s.io CRDs. Install the external-snapshotter CRDs and
+controller, or set snapshotPolicy: none on the drivers.
+{{- end }}
+{{- end }}

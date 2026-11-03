@@ -1,0 +1,3 @@
+# Driver objects outside the operator's namespace are never used by Rook.
+# namespace: ceph-csi
+# expect-error: install ces-csi-drivers in the Rook operator's namespace "rook-ceph"

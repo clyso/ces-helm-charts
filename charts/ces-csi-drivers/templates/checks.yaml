@@ -1,0 +1,20 @@
+{{- /*
+Renders nothing. Refuses a drivers release that the Rook operator would not
+use.
+
+Rook (with ceph-csi-operator) expects the Driver objects in the operator's
+namespace, named <operator namespace>.<driver>.csi.ceph.com: that is the
+provisioner it writes into every StorageClass it creates. A driver under any
+other name runs, but no Rook volume is ever provisioned through it.
+*/ -}}
+{{- $csi := index .Values "ceph-csi-drivers" -}}
+{{- $ns := $csi.operatorConfig.namespace -}}
+{{- if ne .Release.Namespace $ns -}}
+{{- fail (printf "install ces-csi-drivers in the Rook operator's namespace %q (ceph-csi-drivers.operatorConfig.namespace), not in %q" $ns .Release.Namespace) -}}
+{{- end -}}
+{{- range $type, $driver := $csi.drivers -}}
+{{- $want := printf "%s.%s.csi.ceph.com" $ns $type -}}
+{{- if and $driver.enabled (ne $driver.name $want) -}}
+{{- fail (printf "ceph-csi-drivers.drivers.%s.name is %q, but Rook provisions through %q (operator namespace, then driver)" $type $driver.name $want) -}}
+{{- end -}}
+{{- end -}}

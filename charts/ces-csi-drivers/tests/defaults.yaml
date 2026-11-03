@@ -1,0 +1,8 @@
+# The chart defaults: Rook's recommended values.
+# expect: kind: Driver +metadata: +name: rook-ceph\.rbd\.csi\.ceph\.com +namespace: rook-ceph
+# expect: kind: Driver +metadata: +name: rook-ceph\.cephfs\.csi\.ceph\.com +namespace: rook-ceph
+# expect: kind: OperatorConfig +metadata: +name: ceph-csi-operator-config +namespace: rook-ceph
+# expect: imageSet: +name: rook-csi-operator-image-set-configmap
+# expect: name: rook-ceph-rbd-csi-ceph-com-ctrlplugin-sa
+# reject: name: rook-ceph\.nfs\.csi\.ceph\.com
+# reject: name: rook-ceph\.nvmeof\.csi\.ceph\.com

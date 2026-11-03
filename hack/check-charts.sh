@@ -5,8 +5,9 @@
 #   hack/check-charts.sh               every chart
 #   hack/check-charts.sh <chart>...    only these (directory names in charts/)
 #
-# First each chart's subcharts are fetched if missing and compared with its
-# dependencies.sha256 (hack/fetch-subcharts.sh). Then, for each chart:
+# First every chart's subcharts are fetched if missing and checked
+# (hack/fetch-subcharts.sh), and the charts must pin one consistent set of
+# upstream versions (hack/check-versions.py). Then, for each chart:
 #   1. values.schema.json must match values.schema.yaml (hack/gen-schemas.py)
 #   2. render each tests/*.yaml case and compare with its expectations; lint
 #      the chart (helm lint --strict) with the values of every passing case
@@ -131,7 +132,10 @@ else
   charts=()
   for c in "$ROOT"/charts/*/Chart.yaml; do charts+=("$(basename "$(dirname "$c")")"); done
 fi
-"$ROOT/hack/fetch-subcharts.sh" "${charts[@]}" || bad "subcharts missing or not matching dependencies.sha256"
+# Every chart's subcharts, whichever charts are checked: check-versions.py
+# reads the rook-ceph archive of ces-rook-operator.
+"$ROOT/hack/fetch-subcharts.sh" || bad "subcharts missing or not matching their pins"
+python3 -I "$ROOT/hack/check-versions.py" || bad "the charts pin inconsistent versions"
 for c in "${charts[@]}"; do check_chart "$c"; done
 
 if (( failures )); then

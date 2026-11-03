@@ -1,0 +1,11 @@
+# Another operator namespace works when the namespace and names agree.
+# namespace: storage-system
+# expect: kind: Driver +metadata: +name: storage-system\.rbd\.csi\.ceph\.com +namespace: storage-system
+ceph-csi-drivers:
+  operatorConfig:
+    namespace: storage-system
+  drivers:
+    rbd:
+      name: storage-system.rbd.csi.ceph.com
+    cephfs:
+      name: storage-system.cephfs.csi.ceph.com

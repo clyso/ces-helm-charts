@@ -1,0 +1,38 @@
+# ces-csi-drivers: the Ceph CSI drivers, for Ceph volumes in this Kubernetes
+# cluster. Install it once, after ces-rook-operator and in the Rook
+# operator's namespace (rook-ceph). It needs the ceph-csi-operator that
+# ces-rook-operator installs by default; without CSI, skip this chart.
+#
+# Settings for the upstream chart go under `ceph-csi-drivers:`; other
+# top-level keys are rejected. The upstream defaults alone do not work with
+# Rook, so these are Rook 1.21.1's recommended values for this chart
+# (deploy/charts/ceph-csi-drivers/values.yaml in rook/rook), unchanged.
+ceph-csi-drivers:
+  operatorConfig:
+    # The Rook operator's namespace. This release must be installed there.
+    namespace: rook-ceph
+    driverSpecDefaults:
+      # Written by ces-rook-operator from its rook-ceph.csi.* image settings.
+      imageSet:
+        name: rook-csi-operator-image-set-configmap
+      nodePlugin:
+        priorityClassName: system-node-critical
+      controllerPlugin:
+        priorityClassName: system-cluster-critical
+
+  # Rook writes <operator namespace>.<driver>.csi.ceph.com as the provisioner
+  # of every StorageClass it creates, so the names must stay in that form
+  # (templates/checks.yaml).
+  drivers:
+    rbd:
+      enabled: true
+      name: rook-ceph.rbd.csi.ceph.com
+    cephfs:
+      enabled: true
+      name: rook-ceph.cephfs.csi.ceph.com
+    nfs:
+      enabled: false
+      name: rook-ceph.nfs.csi.ceph.com
+    nvmeof:
+      enabled: false
+      name: rook-ceph.nvmeof.csi.ceph.com
