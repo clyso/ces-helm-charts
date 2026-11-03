@@ -1,0 +1,2 @@
+# The defaults name no CES release, so the chart refuses to render.
+# expect-error: set rook-ceph-cluster\.cephImage\.tag to the CES release this cluster runs, such as ces-v19\.2\.6-1 \(now ""\)

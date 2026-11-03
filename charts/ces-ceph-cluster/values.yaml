@@ -1,0 +1,20 @@
+# ces-ceph-cluster: a CES cluster, run by the operator from
+# ces-rook-operator.
+#
+# Settings for the upstream chart go under `rook-ceph-cluster:` and behave as
+# Rook documents them for rook-ceph-cluster 1.21.1. Only the defaults below
+# are Clyso's. Every other default is upstream's, including the storage
+# selection, the pools, the filesystem, the object store and their
+# StorageClasses: README.md lists the ones to review.
+rook-ceph-cluster:
+  # A ceph CLI pod (rook-ceph-tools), running the cluster's image.
+  toolbox:
+    enabled: true
+
+  # The CES image. There is no default release: set tag to the one this
+  # cluster runs, such as ces-v19.2.6-1. The chart refuses to render without
+  # it (templates/checks.yaml).
+  cephImage:
+    repository: harbor.clyso.com/ces/ceph/ceph
+    tag: ""
+    allowUnsupported: false

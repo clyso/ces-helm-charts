@@ -1,0 +1,23 @@
+apiVersion: v2
+name: ces-ceph-cluster
+description: A Clyso Enterprise Storage (CES) cluster managed by Rook
+type: application
+# Released together with ces-rook-operator, under the same version and rules.
+version: 1.0.0
+# The Rook release, as in ces-rook-operator. The CES release is not part of
+# the chart: each cluster names its own in rook-ceph-cluster.cephImage.tag.
+appVersion: "v1.21.1"
+kubeVersion: ">=1.32.0-0 <1.38.0-0"
+keywords:
+  - ceph
+  - rook
+  - ces
+dependencies:
+  # Exact pin, equal to the rook-ceph pin of ces-rook-operator;
+  # hack/check-versions.py enforces that.
+  - name: rook-ceph-cluster
+    version: "1.21.1"
+    repository: https://charts.rook.io/release
+annotations:
+  clyso.com/rook-version: "1.21.1"
+  clyso.com/ceph-csi-operator-version: "1.1.0"

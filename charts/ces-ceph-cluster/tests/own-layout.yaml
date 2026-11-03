@@ -1,0 +1,23 @@
+# A cluster's own layout replaces upstream's: only the listed devices, and no
+# pool, filesystem, object store or StorageClass until the values define one.
+# A list in the values replaces upstream's whole list, and [] empties it.
+# expect: useAllDevices: false +useAllNodes: false
+# expect: name: /dev/disk/by-id/wwn-0x5000c500a1b2c301
+# reject: kind: CephBlockPool
+# reject: kind: CephFilesystem
+# reject: kind: CephObjectStore
+# reject: kind: StorageClass
+rook-ceph-cluster:
+  cephImage:
+    tag: ces-v19.2.6-1
+  cephClusterSpec:
+    storage:
+      useAllNodes: false
+      useAllDevices: false
+      nodes:
+        - name: node-1
+          devices:
+            - name: /dev/disk/by-id/wwn-0x5000c500a1b2c301
+  cephBlockPools: []
+  cephFileSystems: []
+  cephObjectStores: []

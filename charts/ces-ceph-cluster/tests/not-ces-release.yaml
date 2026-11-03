@@ -1,0 +1,5 @@
+# A tag that names no CES release, such as an upstream one, is refused.
+# expect-error: such as ces-v19\.2\.6-1 \(now "v19\.2\.3"\)
+rook-ceph-cluster:
+  cephImage:
+    tag: v19.2.3

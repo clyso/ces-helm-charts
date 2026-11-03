@@ -5,7 +5,9 @@ The charts are released together, so they must agree on their own version
 and kubeVersion. Each upstream dependency must match the version annotation
 that names it, and those annotations must agree across charts. The
 ceph-csi-drivers pin must match the ceph-csi-operator that the vendored
-rook-ceph archive bundles.
+rook-ceph archive bundles. Each chart's appVersion names its upstream
+release, v<pinned version>; the CES release is set per cluster, never by a
+chart.
 
     hack/check-versions.py
 """
@@ -21,6 +23,7 @@ CHARTS = pathlib.Path(__file__).resolve().parent.parent / "charts"
 # Upstream dependency -> the annotation that records its version.
 PINS = {
     "rook-ceph": "clyso.com/rook-version",
+    "rook-ceph-cluster": "clyso.com/rook-version",
     "ceph-csi-drivers": "clyso.com/ceph-csi-operator-version",
 }
 
@@ -67,6 +70,15 @@ def main() -> int:
                     errors.append(f"{name}: cannot read the vendored rook-ceph {dep['version']} archive")
                 elif bundled != want:
                     errors.append(f"{name}: rook-ceph bundles ceph-csi-operator {bundled}, annotations say {want}")
+
+    for name, meta in charts.items():
+        deps = meta.get("dependencies", [])
+        if len(deps) != 1:
+            errors.append(f"{name}: expected one upstream dependency, found {len(deps)}")
+            continue
+        want = f"v{deps[0]['version']}"
+        if meta.get("appVersion") != want:
+            errors.append(f"{name}: appVersion {meta.get('appVersion')} is not {want}, the {deps[0]['name']} pin")
 
     for error in errors:
         print(f"FAIL: {error}", file=sys.stderr)

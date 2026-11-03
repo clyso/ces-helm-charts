@@ -1,0 +1,25 @@
+{{- /*
+Renders nothing. Refuses to render until the values name a CES release.
+
+There is no default tag. With one, an upgrade to a chart version with a newer
+default would also move every cluster relying on it to another Ceph release,
+and a rollback past such an upgrade would move it back: Rook rolls an older
+image out too, logging only that downgrades are not supported.
+
+The tag must name a CES release, ces-<version>. That also catches values that
+set rook-ceph-cluster to null, such as a file whose keys under it are all
+commented out: Helm then drops every setting under it, this chart's and
+earlier files' alike, and upstream's image and tag fill in.
+
+cephClusterSpec.cephVersion is refused too: the upstream template already
+writes cephVersion from cephImage, so a second one leaves the CephCluster
+with two cephVersion keys and the toolbox on the image from cephImage.
+*/ -}}
+{{- $v := index .Values "rook-ceph-cluster" -}}
+{{- $tag := dig "cephImage" "tag" "" $v | toString -}}
+{{- if not (hasPrefix "ces-" $tag) -}}
+{{- fail (printf "set rook-ceph-cluster.cephImage.tag to the CES release this cluster runs, such as ces-v19.2.6-1 (now %q)" $tag) -}}
+{{- end -}}
+{{- if hasKey ($v.cephClusterSpec | default dict) "cephVersion" -}}
+{{- fail "set the image with rook-ceph-cluster.cephImage (repository, tag, allowUnsupported), not with cephClusterSpec.cephVersion" -}}
+{{- end -}}

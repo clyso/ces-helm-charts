@@ -1,0 +1,6 @@
+# Below Rook 1.21's tested range.
+# kube-version: v1.31.9+rke2r1
+# expect-error: incompatible with Kubernetes v1\.31\.9
+rook-ceph-cluster:
+  cephImage:
+    tag: ces-v19.2.6-1

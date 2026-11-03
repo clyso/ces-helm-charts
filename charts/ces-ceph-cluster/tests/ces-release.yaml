@@ -1,0 +1,13 @@
+# With only a CES release named, everything else is upstream's: the release
+# runs in every daemon and in the toolbox, and upstream's data directory,
+# device selection, pools, filesystem and object store apply.
+# expect: cephVersion: +image: "harbor\.clyso\.com/ces/ceph/ceph:ces-v19\.2\.6-1" +allowUnsupported: false
+# expect: name: rook-ceph-tools +image: "harbor\.clyso\.com/ces/ceph/ceph:ces-v19\.2\.6-1"
+# expect: dataDirHostPath: /var/lib/rook
+# expect: useAllDevices: true +useAllNodes: true
+# expect: kind: CephBlockPool
+# expect: kind: CephFilesystem
+# expect: kind: CephObjectStore
+rook-ceph-cluster:
+  cephImage:
+    tag: ces-v19.2.6-1

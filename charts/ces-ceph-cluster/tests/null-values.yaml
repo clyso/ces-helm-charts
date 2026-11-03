@@ -1,0 +1,6 @@
+# rook-ceph-cluster with every key under it commented out is null, which drops
+# every setting under it; upstream's tag fills in, and is refused.
+# expect-error: such as ces-v19\.2\.6-1 \(now "v[0-9.]+"\)
+rook-ceph-cluster:
+#  cephImage:
+#    tag: ces-v19.2.6-1

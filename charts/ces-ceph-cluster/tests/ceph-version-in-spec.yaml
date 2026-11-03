@@ -1,0 +1,9 @@
+# The upstream template writes cephVersion from cephImage, so a second one in
+# cephClusterSpec is refused.
+# expect-error: not with cephClusterSpec\.cephVersion
+rook-ceph-cluster:
+  cephImage:
+    tag: ces-v19.2.6-1
+  cephClusterSpec:
+    cephVersion:
+      image: harbor.clyso.com/ces/ceph/ceph:ces-v20.2.4-1

@@ -1,0 +1,4 @@
+# An upstream key at the top level would be ignored, so the schema refuses it.
+# expect-error: additional properties 'cephImage' not allowed
+cephImage:
+  tag: ces-v19.2.6-1

@@ -1,0 +1,21 @@
+{{- $v := index .Values "rook-ceph-cluster" -}}
+{{- $ns := .Release.Namespace -}}
+CES cluster {{ $v.clusterName | default $ns }} ({{ $v.cephImage.repository }}:{{ $v.cephImage.tag }}) is being created in namespace {{ $ns }}.
+
+Follow it with:
+  kubectl -n {{ $ns }} get cephcluster -w
+{{- if $v.toolbox.enabled }}
+  kubectl -n {{ $ns }} exec deploy/rook-ceph-tools -- ceph status
+{{- end }}
+
+Wait for HEALTH_OK before upgrading anything.
+{{- $classes := list }}
+{{- range $list := list "cephBlockPools" "cephECBlockPools" "cephFileSystems" "cephObjectStores" }}
+{{- range index $v $list | default list }}
+{{- if (.storageClass | default dict).enabled }}{{ $classes = append $classes .storageClass.name }}{{ end }}
+{{- end }}
+{{- end }}
+{{- if $classes }}
+
+StorageClasses: {{ join ", " $classes }}
+{{- end }}
