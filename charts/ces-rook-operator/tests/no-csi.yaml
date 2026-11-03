@@ -1,0 +1,11 @@
+# Rook's documented mode for clusters without CSI: no ceph-csi-operator or
+# CSI CRDs, and no CSI objects from Rook. The chart renders it, though Rook
+# 1.21.1's operator cannot start this way yet (rook/rook#18654).
+# expect: ROOK_CREATE_CSI_OPERATOR_RESOURCES: "false"
+# expect: name: cephclusters\.ceph\.rook\.io
+# reject: name: drivers\.csi\.ceph\.io
+# reject: image: quay\.io/cephcsi/ceph-csi-operator
+rook-ceph:
+  csi:
+    installCsiOperator: false
+    createCsiOperatorResources: false

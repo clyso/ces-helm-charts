@@ -1,0 +1,30 @@
+{{- $rook := index .Values "rook-ceph" -}}
+{{- $pinned := printf "v%s" (index .Chart.Dependencies 0).Version -}}
+{{- /* Helm's subchart condition acts only on a boolean; any other value installs the subchart. */ -}}
+{{- $csiOperator := not (and (kindIs "bool" $rook.csi.installCsiOperator) (not $rook.csi.installCsiOperator)) -}}
+{{ .Chart.Name }} {{ .Chart.Version }} runs the Rook {{ $pinned }} operator in namespace {{ .Release.Namespace }}.
+
+Next:
+  1. For Ceph volumes in this Kubernetes cluster, install ces-csi-drivers in
+     this namespace ({{ .Release.Namespace }}).
+  2. Install a ces-ceph-cluster release for each CES cluster, with
+     rook-ceph-cluster.operatorNamespace={{ .Release.Namespace }}.
+{{- if $csiOperator }}
+
+Upgrade this release; never uninstall it while a CephCluster exists. The
+ceph-csi-operator CRDs it installs carry no keep policy: `helm uninstall`
+deletes them and the CSI drivers of every CephCluster, and so does turning
+rook-ceph.csi.installCsiOperator off.
+{{- else }}
+
+WARNING: ceph-csi-operator is not installed. Rook 1.21.1 still watches its
+ClientProfile objects, so without the csi.ceph.io CRDs the operator exits
+about two minutes after each start (rook/rook#18654). To run without CSI,
+keep it installed, scaled to zero if idle, and leave out ces-csi-drivers.
+{{- end }}
+{{- if ne $rook.image.tag $pinned }}
+
+WARNING: the operator image tag {{ $rook.image.tag }} differs from the pinned
+chart ({{ $pinned }}). CRDs and RBAC come from {{ $pinned }}; Clyso tests
+only matching versions.
+{{- end }}

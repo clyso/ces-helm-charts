@@ -1,0 +1,26 @@
+apiVersion: v2
+name: ces-rook-operator
+description: Rook operator for Clyso Enterprise Storage (CES), pinned to one Rook release
+type: application
+# Clyso's own SemVer: major when the pinned Rook minor changes, minor for a
+# Rook patch release, patch for changes of our own. No pre-release suffixes:
+# Helm hides those unless --devel is given.
+version: 1.0.0
+appVersion: "v1.21.1"
+# The Kubernetes versions Rook 1.21 is tested against. The -0 suffixes keep
+# versions carrying a pre-release suffix (v1.35.2-eks-..., v1.35.1-gke.100)
+# inside the range; build metadata such as +rke2r1 or +k3s1 matches anyway.
+kubeVersion: ">=1.32.0-0 <1.38.0-0"
+keywords:
+  - ceph
+  - rook
+  - ces
+dependencies:
+  # Exact pin, never a range. Changing it is a new release of this chart, and
+  # rook-ceph-cluster in ces-ceph-cluster must move with it.
+  - name: rook-ceph
+    version: "1.21.1"
+    repository: https://charts.rook.io/release
+annotations:
+  clyso.com/rook-version: "1.21.1"
+  clyso.com/ceph-csi-operator-version: "1.1.0"

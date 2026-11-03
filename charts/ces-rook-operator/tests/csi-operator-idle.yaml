@@ -1,0 +1,8 @@
+# Without CSI on Rook 1.21.1: the CSI operator stays for its CRDs, which Rook
+# needs (rook/rook#18654), but runs no pod.
+# expect: name: ceph-csi-controller-manager .{0,600}spec: +replicas: 0
+# expect: name: clientprofiles\.csi\.ceph\.io
+rook-ceph:
+  ceph-csi-operator:
+    controllerManager:
+      replicas: 0

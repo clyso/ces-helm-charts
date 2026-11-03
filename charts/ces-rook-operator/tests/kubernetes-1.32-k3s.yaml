@@ -1,0 +1,3 @@
+# The lowest supported minor, as k3s reports it.
+# kube-version: v1.32.3+k3s1
+# expect: kind: Deployment

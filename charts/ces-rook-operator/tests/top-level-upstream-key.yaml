@@ -1,0 +1,3 @@
+# An upstream key at the top level would be ignored, so the schema refuses it.
+# expect-error: currentNamespaceOnly
+currentNamespaceOnly: true

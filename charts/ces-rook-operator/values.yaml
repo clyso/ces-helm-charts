@@ -1,0 +1,14 @@
+# ces-rook-operator: the Rook operator for CES. Install it once per
+# Kubernetes cluster, before ces-csi-drivers and any ces-ceph-cluster release.
+#
+# Settings for the upstream chart go under `rook-ceph:`. Top-level keys other
+# than `rook-ceph` and `global` are rejected, because Helm would otherwise
+# ignore them without a word. Every default is upstream's for rook-ceph
+# 1.21.1, including the operator image (docker.io/rook/ceph:v1.21.1) and the
+# bundled ceph-csi-operator 1.1.0, apart from the one below.
+rook-ceph:
+  csi:
+    # Rook's own default, which upstream's chart leaves empty. A running
+    # operator that sees this setting change from "true" to empty takes CSI as
+    # off, and deletes every cluster's CephConnection and ClientProfile.
+    createCsiOperatorResources: true

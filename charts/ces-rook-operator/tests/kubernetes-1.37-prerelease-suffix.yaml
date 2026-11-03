@@ -1,0 +1,3 @@
+# A distribution version with a pre-release suffix stays inside the range.
+# kube-version: v1.37.2-eks-4a1b2c3
+# expect: kind: Deployment

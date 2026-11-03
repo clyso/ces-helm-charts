@@ -1,0 +1,15 @@
+# Patterns to ignore when building packages.
+.DS_Store
+.git/
+.gitignore
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.idea/
+.vscode/
+# Development files: schema source, dependency digests, test cases.
+values.schema.yaml
+dependencies.sha256
+tests/

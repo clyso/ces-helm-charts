@@ -1,0 +1,17 @@
+# Source of values.schema.json, which hack/gen-schemas.py writes. Edit this
+# file, never the JSON.
+#
+# Settings for the upstream chart belong under rook-ceph:. Helm would ignore
+# anything else at the top level without a word, so the schema refuses it.
+# What goes inside rook-ceph: is left to the upstream chart and its
+# documentation.
+$schema: http://json-schema.org/draft-07/schema#
+title: ces-rook-operator values
+type: object
+additionalProperties: false
+properties:
+  global:
+    type: object
+  rook-ceph:
+    description: Values for the rook-ceph 1.21.1 subchart, passed on unchanged.
+    type: object
